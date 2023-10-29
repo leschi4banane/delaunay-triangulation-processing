@@ -2,10 +2,7 @@ import java.util.*;
 
 int n_points = 4;
 List<Point> points = new ArrayList<Point>();  
-//Point[] points = new Point[100];
 List<Triangle> triangles = new ArrayList<Triangle>();  
-//Triangle[] triangles = new Triangle[1000];
-//int n_tri = 1;
 
 Triangle super_triangle;
 
