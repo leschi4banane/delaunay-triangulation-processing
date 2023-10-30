@@ -12,7 +12,7 @@ void setup() {
   smooth();
   noFill();
   
-  super_triangle = smallestTriangleOutsideOfBox(width/2, height/2+39, width, height);
+  super_triangle = smallestTriangleOutsideOfBox(width/2, height/2, width, height);
   triangles.add(super_triangle);
   
   for (int i = 0; i<n_points; i++) {
@@ -27,7 +27,16 @@ void setup() {
 
 
 void draw() {
+  background(200);
+  triangles.clear();
+  triangles.add(super_triangle);
+  
   for (Point point:points)   {
+    fill(0,0,255);
+    noStroke();
+    circle(point.x, point.y, 10);
+    stroke(0);
+    noFill();
     List<Triangle> bad_triangles = new ArrayList<Triangle>(); 
     for (Triangle triangle:triangles) { 
       if (triangle.inCircumcircle(point)) {
@@ -50,13 +59,41 @@ void draw() {
     for (Triangle triangle:bad_triangles) { 
       triangles.remove(triangle);
     }
-    
+   
+    List<Triangle> new_triangles = new ArrayList<Triangle>();
     for (Edge edge:poligons) { 
-      triangles.add(edge.toTriangle(point));
+      new_triangles.add(edge.toTriangle(point));
     }
+    List<Triangle> flipped_triangles = new ArrayList<Triangle>();
+    List<Triangle> old_triangles = new ArrayList<Triangle>();
+    
+    for (Triangle triangle1 : new_triangles) {
+      for (Triangle triangle2 : new_triangles) {
+        if (triangle1 != triangle2) {
+        if (triangle1.adjacent(triangle2)) {
+          if (triangle1.flippingBeneficial(triangle2)) {
+            old_triangles.add(triangle1);
+            old_triangles.add(triangle2);
+            flipped_triangles.addAll(triangle1.flipTriangles(triangle2));
+          }
+
+        }
+        }
+      }
+    }
+    for (Triangle triangle : old_triangles) {
+      new_triangles.remove(triangle);
+    }
+    for (Triangle triangle : flipped_triangles) {
+      new_triangles.add(triangle);
+    }
+    for (Triangle triangle : new_triangles) {
+      triangles.add(triangle);
+    }
+
   }
- 
-  
+
+
   List<Triangle> final_triangles = new ArrayList<Triangle>(); 
   for (Triangle triangle:triangles) {
     if (triangle.sharesVertex(super_triangle) == false) {
@@ -64,15 +101,17 @@ void draw() {
     }
    }
    
+
    for (Triangle triangle:final_triangles) {
      fill(0,0,0,0);
      triangle(triangle.A.x, triangle.A.y, triangle.B.x, triangle.B.y, triangle.C.x, triangle.C.y);
    }
 }
 
-
-
-
+void mousePressed() {
+  points.add(new Point(mouseX, mouseY));
+  redraw();
+}
 
 
 
@@ -82,6 +121,12 @@ public class Point {
    public Point(float X,float Y) {
     x = X;
     y = Y;
+   }
+   public boolean same(Point compare) {
+     if (compare.x == this.x && compare.y == this.y) {
+       return true;
+     }
+     return false;
    }
 }
 
@@ -94,6 +139,7 @@ public class Circle  {
     C = _C;
     r = _r;
   }
+  
 }
 
 
@@ -107,7 +153,7 @@ public class Edge {
   // returns true if the edge shares a edge with the Triangle passed in
   private boolean sharesEdge(Triangle T) {
        for (Edge edge:T.edges()) {
-         if (this.A == edge.A && this.B == edge.B) {
+         if (this.same(edge)) {
            return true;
          }
        }
@@ -126,6 +172,13 @@ public class Edge {
     return new Triangle(A, B, P);
     
   }
+  public boolean same(Edge compare) {
+    if ((this.A.same(compare.A) && this.B.same(compare.B)) || (this.A.same(compare.B) && this.B.same(compare.A))) {
+    return true;
+    }
+    return false;
+  }
+
 }
 
 // triangle class
@@ -169,7 +222,7 @@ public class Triangle {
   public boolean sharesVertex(Triangle other) {
     for (Point point1:this.vertices()) {
       for (Point point2:other.vertices()) {
-        if (point1 == point2) {
+        if (point1.same(point2)) {
           return true;
         }
       }
@@ -184,6 +237,56 @@ public class Triangle {
     points.add(C);
     return points;
   }
+  
+  private Edge commonEdge(Triangle T) {
+    for (Edge edge1:this.edges()) {
+      for (Edge edge2:T.edges()) {
+        if (edge1.same(edge2)) {
+          return edge1;
+        }
+      }
+    }
+    return new Edge(new Point(0,0), new Point(0,0));
+  }
+public Point oppositeVertex(Edge edge) {
+    if (new Edge(A,B).same(edge)) { return C; }
+    else if (new Edge(B,C).same(edge)) { return A; }
+    else if (new Edge(C,A).same(edge)) { return B; }
+    else { return new Point(0, 0);}
+}
+
+
+  public boolean flippingBeneficial(Triangle T) {
+    Edge common = this.commonEdge(T);
+    if (this.inCircumcircle(T.oppositeVertex(common))) {
+      return true;
+    }
+    if (T.inCircumcircle(this.oppositeVertex(common))) {
+      return true;
+    }
+    return false;
+  }
+  
+  public List<Triangle> flipTriangles(Triangle T) {
+    List<Triangle> triangles = new ArrayList<Triangle>();  
+    Edge common = this.commonEdge(T);
+    Point opposite1 = this.oppositeVertex(common);
+    Point opposite2 = T.oppositeVertex(common);
+    
+    triangles.add(new Triangle(opposite1, opposite2, common.A));
+    triangles.add(new Triangle(opposite1, opposite2, common.B));
+    
+    return triangles;
+  }
+  public boolean adjacent(Triangle T) {
+    for (Edge edge:this.edges()) {
+      if(edge.sharesEdge(T)) {
+        return true;
+      }
+    }
+    return false;
+  }
+ 
 }
 
 
