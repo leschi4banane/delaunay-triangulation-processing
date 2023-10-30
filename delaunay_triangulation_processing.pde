@@ -1,4 +1,4 @@
-import java.util.*;  
+import java.util.List;  
 
 int n_points = 4;
 List<Point> points = new ArrayList<Point>();  
@@ -12,7 +12,7 @@ void setup() {
   smooth();
   noFill();
   
-  super_triangle = smallest_triangle_outside_of_box(width/2, height/2+39, width, height);
+  super_triangle = smallestTriangleOutsideOfBox(width/2, height/2+39, width, height);
   triangles.add(super_triangle);
   
   for (int i = 0; i<n_points; i++) {
@@ -30,7 +30,7 @@ void draw() {
   for (Point point:points)   {
     List<Triangle> bad_triangles = new ArrayList<Triangle>(); 
     for (Triangle triangle:triangles) { 
-      if (triangle.in_circumcircle(point)) {
+      if (triangle.inCircumcircle(point)) {
         bad_triangles.add(triangle);
       }
     }
@@ -38,9 +38,10 @@ void draw() {
     List<Edge> poligons = new ArrayList<Edge>(); 
     for (Triangle triangle:bad_triangles) { 
       for (Edge edge:triangle.edges()) {
-        List<Triangle> without_current = new ArrayList<Triangle>(bad_triangles);
+        List<Triangle> without_current = new ArrayList<Triangle>();
+        without_current.addAll(bad_triangles);
         without_current.remove(triangle);
-        if (edge.shares_edges(without_current) == false) {
+        if (edge.sharesEdges(without_current) == false) { 
           poligons.add(edge);
         }
       }
@@ -51,14 +52,14 @@ void draw() {
     }
     
     for (Edge edge:poligons) { 
-      triangles.add(edge.to_triangle(point));
+      triangles.add(edge.toTriangle(point));
     }
   }
  
   
   List<Triangle> final_triangles = new ArrayList<Triangle>(); 
   for (Triangle triangle:triangles) {
-    if (triangle.shares_vertex(super_triangle) == false) {
+    if (triangle.sharesVertex(super_triangle) == false) {
       final_triangles.add(triangle);
     }
    }
@@ -104,24 +105,24 @@ public class Edge {
     B = b;
   }
   // returns true if the edge shares a edge with the Triangle passed in
-  private boolean shares_edge(Triangle T) {
+  private boolean sharesEdge(Triangle T) {
        for (Edge edge:T.edges()) {
-         if (this == edge) {
+         if (this.A == edge.A && this.B == edge.B) {
            return true;
          }
        }
        return false;
     }
   // returns true if the edge shares a edge with one or more Triangles in the list
-  public boolean shares_edges(List<Triangle> triangles) {
+  public boolean sharesEdges(List<Triangle> triangles) {
     for (Triangle triangle:triangles) {
-      if (shares_edge(triangle) == true)
+      if (sharesEdge(triangle) == true)
       return true;
     }
     return false;
   }
   // creates a triangle with the edge and a passed in point
-  public Triangle to_triangle(Point P) {
+  public Triangle toTriangle(Point P) {
     return new Triangle(A, B, P);
     
   }
@@ -149,7 +150,7 @@ public class Triangle {
     return new Circle(C , dist(C.x, C.y, A.x, A.y));
   }
   // returnss if a Point is in the circumcircle
-  public boolean in_circumcircle(Point P) {
+  public boolean inCircumcircle(Point P) {
     Circle circum = circumcircle();
     if (dist(P.x, P.y, circum.C.x, circum.C.y) <= circum.r) {
       return true;
@@ -165,7 +166,7 @@ public class Triangle {
     return Edges;
   }
   // returns true if the triangle shares one or more vertex with the triangle passed in 
-  public boolean shares_vertex(Triangle other) {
+  public boolean sharesVertex(Triangle other) {
     for (Point point1:this.vertices()) {
       for (Point point2:other.vertices()) {
         if (point1 == point2) {
@@ -187,7 +188,7 @@ public class Triangle {
 
 
 // returns the smallest triangle around a box (the screen)
-Triangle smallest_triangle_outside_of_box(float x,float y, float box_width, float box_height) {
+Triangle smallestTriangleOutsideOfBox(float x,float y, float box_width, float box_height) {
   float s = (3*box_width+2*sqrt(3)*box_height)/3;
   Point A = new Point(-s/2 + x, box_height/2 + y);
   Point B = new Point(s/2 + x, box_height/2 + y);
