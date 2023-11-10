@@ -1,13 +1,13 @@
 // Edge class
-public class Edge {
+public class Line {
   Point A, B;
-  public Edge(Point a, Point b) {
+  public Line(Point a, Point b) {
     A = a;
     B = b;
   }
   // returns true if the edge shares a edge with the Triangle passed in
   private boolean sharesEdge(Triangle T) {
-    for (Edge edge : T.edges()) {
+    for (Line edge : T.edges()) {
       if (this.same(edge)) {
         return true;
       }
@@ -26,18 +26,18 @@ public class Edge {
   public Triangle toTriangle(Point P) {
     return new Triangle(A, B, P);
   }
-  public boolean same(Edge compare) {
+  public boolean same(Line compare) {
     if ((this.A.same(compare.A) && this.B.same(compare.B)) || (this.A.same(compare.B) && this.B.same(compare.A))) {
       return true;
     }
     return false;
   }
 
-  public Edge perpendicularBisector() {
+  public Line perpendicularBisector() {
     Point mid = new Point((A.x+B.x)/2, (A.y+B.y)/2);
     Point normal = new Point(-(A.y-B.y), (A.x-B.x));
 
-    return new Edge(mid, new Point(mid.x+normal.x, mid.y+normal.y));
+    return new Line(mid, new Point(mid.x+normal.x, mid.y+normal.y));
   }
   public Point midseed() {
     return new Point((this.A.x+this.B.x)/2, (this.A.y+this.B.y)/2);

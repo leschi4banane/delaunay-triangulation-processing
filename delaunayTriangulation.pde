@@ -48,9 +48,9 @@ public class delaunayTriangulation {
         }
       }
       // finds the outside edges of the bad triangles and adds them to a list of edges
-      List<Edge> outsideEdges = new ArrayList<Edge>();
+      List<Line> outsideEdges = new ArrayList<Line>();
       for (Triangle triangle : badTriangles) {
-        for (Edge edge : triangle.edges()) {
+        for (Line edge : triangle.edges()) {
           List<Triangle> badTrianglesWithouCurrent = new ArrayList<Triangle>(badTriangles);
           badTrianglesWithouCurrent.remove(triangle);
           if (!edge.sharesEdges(badTrianglesWithouCurrent)) {
@@ -62,7 +62,7 @@ public class delaunayTriangulation {
       triangulation.removeAll(badTriangles);
       // adds triangles from outside edges of the bad triangles with the current seed toa list of new triangles
       List<Triangle> newTriangles = new ArrayList<Triangle>();
-      for (Edge edge : outsideEdges) {
+      for (Line edge : outsideEdges) {
         newTriangles.add(edge.toTriangle(seed));
       }
       // loops through all the newly created triangles and checks if all ajacent triangles meet the criteria of the delaunay triangulation.

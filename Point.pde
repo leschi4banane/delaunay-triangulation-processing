@@ -17,8 +17,8 @@ public class Point {
     }
     return false;
   }
-  public boolean onBorder(int minX, int minY, int maxX, int maxY) {
-    if(this.x == minX || this.x == maxX || this.y == minY || this.y == maxY) {
+  public boolean onBorder(int minX, int minY, int maxX, int maxY, float tolerance) {
+    if((this.x > minX*(1-tolerance) && this.x < minX*(1+tolerance)) || (this.x > maxX*(1-tolerance) && this.x < maxX*(1+tolerance)) ||  (this.y > minY*(1-tolerance) && this.y < minY*(1+tolerance)) || (this.y > maxY*(1-tolerance) && this.y < maxY*(1+tolerance))) {
       return true;
     }
     return false;

@@ -35,11 +35,11 @@ public class Triangle {
     return false;
   }
   // returns a the list of edges of the triangle
-  public List<Edge> edges() {
-    List<Edge> Edges = new ArrayList<Edge>();
-    Edges.add(new Edge(A, B));
-    Edges.add(new Edge(B, C));
-    Edges.add(new Edge(C, A));
+  public List<Line> edges() {
+    List<Line> Edges = new ArrayList<Line>();
+    Edges.add(new Line(A, B));
+    Edges.add(new Line(B, C));
+    Edges.add(new Line(C, A));
     return Edges;
   }
   // returns true if the triangle shares one or more vertex with the triangle passed in
@@ -62,22 +62,22 @@ public class Triangle {
     return seeds;
   }
 
-  private Edge commonEdge(Triangle T) {
-    for (Edge edge1 : this.edges()) {
-      for (Edge edge2 : T.edges()) {
+  private Line commonEdge(Triangle T) {
+    for (Line edge1 : this.edges()) {
+      for (Line edge2 : T.edges()) {
         if (edge1.same(edge2)) {
           return edge1;
         }
       }
     }
-    return new Edge(new Point(0, 0), new Point(0, 0));
+    return new Line(new Point(0, 0), new Point(0, 0));
   }
-  public Point oppositeVertex(Edge edge) {
-    if (new Edge(A, B).same(edge)) {
+  public Point oppositeVertex(Line edge) {
+    if (new Line(A, B).same(edge)) {
       return C;
-    } else if (new Edge(B, C).same(edge)) {
+    } else if (new Line(B, C).same(edge)) {
       return A;
-    } else if (new Edge(C, A).same(edge)) {
+    } else if (new Line(C, A).same(edge)) {
       return B;
     } else {
       return null;
@@ -85,7 +85,7 @@ public class Triangle {
   }
 
   public boolean flippingBeneficial(Triangle T) {
-    Edge common = this.commonEdge(T);
+    Line common = this.commonEdge(T);
     if (this.inCircumcircle(T.oppositeVertex(common))) {
       return true;
     }
@@ -97,7 +97,7 @@ public class Triangle {
 
   public List<Triangle> flipTriangles(Triangle T) {
     List<Triangle> triangles = new ArrayList<Triangle>();
-    Edge common = this.commonEdge(T);
+    Line common = this.commonEdge(T);
     Point opposite1 = this.oppositeVertex(common);
     Point opposite2 = T.oppositeVertex(common);
 
@@ -107,7 +107,7 @@ public class Triangle {
     return triangles;
   }
   public boolean adjacent(Triangle T) {
-    for (Edge edge : this.edges()) {
+    for (Line edge : this.edges()) {
       if (edge.sharesEdge(T)) {
         return true;
       }

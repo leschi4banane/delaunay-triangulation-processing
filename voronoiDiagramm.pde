@@ -1,5 +1,5 @@
 public class voronoiDiagramm {
-  List<Edge> lines;
+  List<Line> lines;
   List<Point> seeds;
   int minX, maxX, minY, maxY;
 
@@ -13,12 +13,12 @@ public class voronoiDiagramm {
   }
 
   private void calculate() {
-    List<Edge> voronoi = new ArrayList<Edge>();
+    List<Line> voronoi = new ArrayList<Line>();
     // calculates all seeds in the convex hull
     List<Point> convexHull = new ArrayList<Point>();
     List<Triangle> firstTriangulation = new ArrayList<Triangle>(new delaunayTriangulation(seeds).triangles);
     for (Triangle triangle:firstTriangulation) {
-      for (Edge edge:triangle.edges()) {
+      for (Line edge:triangle.edges()) {
         List<Triangle> withouCurrent = new ArrayList<Triangle>(firstTriangulation);
         withouCurrent.remove(triangle);
         if (!edge.sharesEdges(withouCurrent)) {
@@ -36,30 +36,37 @@ public class voronoiDiagramm {
       mirroredSeeds.add(new Point(seed.x, maxY*2-seed.y));
       mirroredSeeds.add(new Point(seed.x, minY*2-seed.y));
     }
+
+   
     mirroredSeeds.addAll(seeds);
+    
     
    
     List<Triangle> triangulation = new ArrayList<Triangle>(new delaunayTriangulation(mirroredSeeds).triangles);
+    
    
     // conects all circumcenters with the ones of ajacent triangles
     for (Triangle triangle1 : triangulation) {
-      for (Edge edge : triangle1.edges()) {
+      stroke(0,0,0,50);
+      // triangle(triangle1.A.x, triangle1.A.y, triangle1.B.x, triangle1.B.y, triangle1.C.x, triangle1.C.y);
+      stroke(0);
+      for (Line edge : triangle1.edges()) {
         for (Triangle triangle2 : triangulation) {
           if (edge.sharesEdge(triangle2) && triangle1 != triangle2) {
-            voronoi.add(new Edge(triangle1.circumcircle().C, triangle2.circumcircle().C));
+            voronoi.add(new Line(triangle1.circumcircle().C, triangle2.circumcircle().C));
           }
         }
       }
     }
-    List<Edge> voronoiCut = new ArrayList<Edge>();
-    for (Edge edge:voronoi) {
-      if ((edge.A.x == minX && edge.B.x == minX) || (edge.A.x == maxX && edge.B.x == maxX) || (edge.A.y == minY && edge.B.y == minY) || (edge.A.y == maxY && edge.B.y == maxY)) {
+    List<Line> voronoiCut = new ArrayList<Line>();
+    for (Line edge:voronoi) {
+      if (edge.A.onBorder(minX, minY, maxX, maxY, 0.00001) && edge.B.onBorder(minX, minY, maxX, maxY, 0.00001)) {
         continue;
       }
-      else if (!edge.A.insideBorder(minX, minY, maxX, maxY) && !edge.B.insideBorder(minX, minY, maxX, maxY)) {
+      if (!edge.A.insideBorder(minX, minY, maxX, maxY) && !edge.B.insideBorder(minX, minY, maxX, maxY)) {
         continue;
       }
-      else if((edge.A.onBorder(minX, minY, maxX, maxY) && !edge.B.insideBorder(minX, minY, maxX, maxY)) || (edge.B.onBorder(minX, minY, maxX, maxY) && !edge.A.insideBorder(minX, minY, maxX, maxY))) {
+      else if((edge.A.onBorder(minX, minY, maxX, maxY, 0.00001) && !edge.B.insideBorder(minX, minY, maxX, maxY)) || (edge.B.onBorder(minX, minY, maxX, maxY, 0.00001) && !edge.A.insideBorder(minX, minY, maxX, maxY))) {
         continue;
       }
       else if (!edge.A.insideBorder(minX, minY, maxX, maxY) || !edge.B.insideBorder(minX, minY, maxX, maxY)) {
@@ -94,7 +101,7 @@ public class voronoiDiagramm {
         else {
           continue; 
         }
-        voronoiCut.add(new Edge(iP, onBorder));
+        voronoiCut.add(new Line(iP, onBorder));
         
       }
       else {
